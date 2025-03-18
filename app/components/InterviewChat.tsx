@@ -26,7 +26,7 @@ export default function InterviewChat({ onComplete }: InterviewChatProps) {
   const voicesRef = useRef<SpeechSynthesisVoice[]>([]);
   const lastSpeechTimeRef = useRef<number>(Date.now());
   const speechStartTimeRef = useRef<number>(0);
-  
+
   // Silence threshold in milliseconds - increased for more natural conversation
   const SILENCE_THRESHOLD = 2500;
   // Punctuation threshold - increased to allow for natural pauses
@@ -43,7 +43,7 @@ export default function InterviewChat({ onComplete }: InterviewChatProps) {
   useEffect(() => {
     startVideoStream();
     initializeSpeechRecognition();
-    
+
     // Initialize voices when component mounts
     const loadVoices = () => {
       voicesRef.current = window.speechSynthesis.getVoices();
@@ -87,13 +87,20 @@ export default function InterviewChat({ onComplete }: InterviewChatProps) {
           console.log('❌ Error stopping recognition:', error);
         }
       }
-      
+
       // Re-enable all keyboard inputs
+      // const inputs = document.querySelectorAll('input, textarea, button');
+      // inputs.forEach((element: HTMLElement) => {
+      //   element.removeAttribute('disabled');
+      // });
+
+
       const inputs = document.querySelectorAll('input, textarea, button');
-      inputs.forEach((element: HTMLElement) => {
-        element.removeAttribute('disabled');
+      inputs.forEach((element) => {
+        (element as HTMLElement).removeAttribute('disabled');
       });
-      
+
+
       // Delay before showing results
       setTimeout(() => {
         onComplete();
@@ -182,12 +189,12 @@ export default function InterviewChat({ onComplete }: InterviewChatProps) {
       recognitionRef.current.onresult = (event: any) => {
         const now = Date.now();
         lastSpeechTimeRef.current = now;
-        
+
         // If this is the first result, record the start time
         if (speechStartTimeRef.current === 0) {
           speechStartTimeRef.current = now;
         }
-        
+
         // Get the transcript
         const transcript = Array.from(event.results)
           .map((result: any) => result[0].transcript)
@@ -196,7 +203,7 @@ export default function InterviewChat({ onComplete }: InterviewChatProps) {
         // Update input value with transcript
         setInputValue(transcript);
         currentTranscript = transcript;
-        
+
         // Clear any existing silence timeout
         if (silenceTimeoutRef.current) {
           clearTimeout(silenceTimeoutRef.current);
@@ -204,13 +211,13 @@ export default function InterviewChat({ onComplete }: InterviewChatProps) {
 
         // Check if the transcript ends with a period, question mark, or exclamation
         const endsWithPunctuation = /[.?!]$/.test(transcript.trim());
-        
+
         // Check if transcript contains a complete thought (has subject and verb)
         const hasCompleteThought = /\b(I|we|they|he|she|it|you)\b.*\b(am|is|are|was|were|have|has|had|do|does|did|can|could|will|would|should|may|might)\b/i.test(transcript);
-        
+
         // Calculate speech duration
         const speechDuration = now - speechStartTimeRef.current;
-        
+
         // Set new silence timeout - longer to allow for natural pauses
         silenceTimeoutRef.current = setTimeout(() => {
           // Only process if enough time has passed since speech started
@@ -246,7 +253,7 @@ export default function InterviewChat({ onComplete }: InterviewChatProps) {
 
   const getBestVoice = () => {
     const voices = voicesRef.current;
-    
+
     // Priority order for male voices
     const preferredVoices = [
       // First priority: Microsoft male voices
@@ -282,7 +289,7 @@ export default function InterviewChat({ onComplete }: InterviewChatProps) {
 
     return new Promise<void>((resolve) => {
       const utterance = new SpeechSynthesisUtterance(message);
-      
+
       // Get the best male voice
       const voice = getBestVoice();
       if (voice) {
@@ -354,7 +361,7 @@ export default function InterviewChat({ onComplete }: InterviewChatProps) {
   const toggleMute = () => setIsMuted(!isMuted);
   const toggleVideo = () => setIsVideoOff(!isVideoOff);
   const toggleQuestions = () => setShowQuestions(!showQuestions);
-  
+
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) {
       mainVideoContainerRef.current?.requestFullscreen();
@@ -391,8 +398,8 @@ export default function InterviewChat({ onComplete }: InterviewChatProps) {
   };
 
   return (
-    <div className="min-h-screen bg-[#1a1b1e]" 
-         onKeyDown={(e) => interviewState.isInterviewStarted && !interviewState.isInterviewComplete && e.preventDefault()}>
+    <div className="min-h-screen bg-[#1a1b1e]"
+      onKeyDown={(e) => interviewState.isInterviewStarted && !interviewState.isInterviewComplete && e.preventDefault()}>
       {/* Header */}
       <div className="bg-[#2d2e31] border-b border-gray-700/50 px-4 py-3">
         <div className="container mx-auto flex justify-between items-center">
@@ -443,7 +450,7 @@ export default function InterviewChat({ onComplete }: InterviewChatProps) {
                   muted={isMuted}
                   className={`w-full h-full object-cover ${isVideoOff ? 'hidden' : ''}`}
                 />
-                
+
                 {/* Video Off Placeholder */}
                 {isVideoOff && (
                   <div className="absolute inset-0 bg-[#2d2e31] flex items-center justify-center">
@@ -492,9 +499,8 @@ export default function InterviewChat({ onComplete }: InterviewChatProps) {
                 {/* Mute Button */}
                 <button
                   disabled
-                  className={`p-3.5 rounded-full transition-all duration-300 opacity-50 ${
-                    isMuted ? 'bg-red-500/20 text-red-500' : 'bg-[#3a3b3f] text-gray-300'
-                  }`}
+                  className={`p-3.5 rounded-full transition-all duration-300 opacity-50 ${isMuted ? 'bg-red-500/20 text-red-500' : 'bg-[#3a3b3f] text-gray-300'
+                    }`}
                 >
                   {isMuted ? (
                     <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -511,9 +517,8 @@ export default function InterviewChat({ onComplete }: InterviewChatProps) {
                 {/* Video Toggle Button */}
                 <button
                   disabled
-                  className={`p-3.5 rounded-full transition-all duration-300 opacity-50 ${
-                    isVideoOff ? 'bg-red-500/20 text-red-500' : 'bg-[#3a3b3f] text-gray-300'
-                  }`}
+                  className={`p-3.5 rounded-full transition-all duration-300 opacity-50 ${isVideoOff ? 'bg-red-500/20 text-red-500' : 'bg-[#3a3b3f] text-gray-300'
+                    }`}
                 >
                   {isVideoOff ? (
                     <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -538,7 +543,7 @@ export default function InterviewChat({ onComplete }: InterviewChatProps) {
                 </button>
 
                 {/* End Call Button */}
-                <button 
+                <button
                   disabled
                   className="p-3.5 rounded-full bg-red-500 text-white opacity-50"
                 >
@@ -552,15 +557,14 @@ export default function InterviewChat({ onComplete }: InterviewChatProps) {
         </div>
 
         {/* Questions Panel - Slides in/out */}
-        <div className={`absolute right-0 top-0 bottom-0 w-96 transform transition-transform duration-300 ease-in-out ${
-          showQuestions ? 'translate-x-0' : 'translate-x-full'
-        }`}>
+        <div className={`absolute right-0 top-0 bottom-0 w-96 transform transition-transform duration-300 ease-in-out ${showQuestions ? 'translate-x-0' : 'translate-x-full'
+          }`}>
           <div className="h-full bg-[#2d2e31] border-l border-gray-700/50 p-6 overflow-y-auto">
             <div className="space-y-6">
               <h2 className="text-xl font-semibold text-white border-b border-gray-700/50 pb-4">
                 Interview Transcript
               </h2>
-              
+
               {/* Messages Display */}
               <div className="space-y-4">
                 {interviewState.messages.map((message, index) => (
